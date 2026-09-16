@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobalTalk AI - 가상 외국인 언어 학습 플랫폼</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A00E0;
+            --primary-light: #8E2DE2;
+            --secondary: #00B4DB;
+            --bg-dark: #0F172A;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #F8FAFC;
+            --text-sub: #94A3B8;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-yellow: #F59E0B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(142, 45, 226, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 180, 219, 0.15) 0%, transparent 40%);
+        }
+
+        /* App Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8E2DE2, #00B4DB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            color: #8E2DE2;
+            -webkit-text-fill-color: initial;
+        }
+
+        .user-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Container Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 73px);
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Sidebar - Selector Panel */
+        .sidebar {
+            width: 380px;
+            background: rgba(15, 23, 42, 0.5);
+            border-right: 1px solid var(--card-border);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Language Selector Tabs */
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn:hover, .lang-btn.active {
+            background: rgba(142, 45, 226, 0.2);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn .flag {
+            font-size: 1.4rem;
+        }
+
+        /* Character Selection Cards */
+        .character-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .character-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .character-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .character-card.active {
+            border-color: var(--secondary);
+            background: rgba(0, 180, 219, 0.15);
+            box-shadow: 0 0 15px rgba(0, 180, 219, 0.2);
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid var(--secondary);
+        }
+
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            border: 2px solid var(--bg-dark);
+        }
+
+        .char-info {
+            flex: 1;
+        }
+
+        .char-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .char-desc {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            line-height: 1.2;
+        }
+
+        .char-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            color: #DDD;
+        }
+
+        /* Difficulty Selector */
+        .difficulty-selector {
+            display: flex;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .diff-btn {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: var(--text-sub);
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .diff-btn.active {
+            color: var(--text-main);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .difficulty-desc {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid var(--secondary);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* Chat Main Screen */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(15, 23, 42, 0.2);
+            position: relative;
+        }
+
+        /* Active Partner Header */
+        .chat-header {
+            padding: 1rem 2rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .active-partner {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .active-partner-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+        }
+
+        .partner-details h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .partner-details p {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* Message Stream */
+        .messages-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 75%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border-top-left-radius: 2px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary), #6366F1);
+            border-color: transparent;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 2px;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message-translation {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(255,255,255,0.15);
+            font-size: 0.82rem;
+            color: #CBD5E1;
+        }
+
+        .audio-play-btn {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            margin-left: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Controls / Voice Input Area */
+        .chat-input-container {
+            padding: 1.5rem 2rem;
+            background: rgba(30, 41, 59, 0.8);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .text-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 14px 20px;
+            border-radius: 30px;
+            color: #FFF;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 10px rgba(142, 45, 226, 0.3);
+        }
+
+        /* Mic Button Animation */
+        .mic-btn-wrapper {
+            position: relative;
+        }
+
+        .mic-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(142, 45, 226, 0.6);
+        }
+
+        .mic-btn.recording {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .send-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--secondary);
+            color: #000;
+        }
+
+        .status-hint {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            height: 18px;
+        }
+
+        /* Helper Modals & Utilities */
+        .feedback-badge {
+            font-size: 0.72rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .chat-area {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-earth-americas"></i>
+            <span>GlobalTalk AI</span>
+        </div>
+        <div class="user-stats">
+            <div class="stat-badge">
+                <i class="fa-solid fa-fire" style="color: #F59E0B;"></i>
+                <span>연속 학습 5일차</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fa-solid fa-trophy" style="color: #10B981;"></i>
+                <span>Level: 중급</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Main Layout -->
+    <div class="app-container">
+
+        <!-- Sidebar Configurator -->
+        <aside class="sidebar">
+            
+            <!-- Step 1: Foreign Language Selection -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-language"></i> 1. 학습 언어 선택</div>
+                <div class="lang-grid">
+                    <button class="lang-btn active" onclick="selectLanguage('en')">
+                        <span class="flag">🇺🇸</span> English
+                    </button>
+                    <button class="lang-btn" onclick="selectLanguage('ja')">
+                        <span class="flag">🇯🇵</span> 日本語
+                    </button>
+                    <button class="lang-btn" onclick="selectLanguage('fr')">
+                        <span class="flag">🇫🇷</span> Français
+                    </button>
+                    <button class="lang-btn" onclick="selectLanguage('zh')">
+                        <span class="flag">🇨🇳</span> 中文
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Difficulty Level Selection -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-sliders"></i> 2. 대화 난이도 선택</div>
+                <div class="difficulty-selector">
+                    <button class="diff-btn active" onclick="setDifficulty('easy')">초급 (Easy)</button>
+                    <button class="diff-btn" onclick="setDifficulty('medium')">중급 (Medium)</button>
+                    <button class="diff-btn" onclick="setDifficulty('hard')">고급 (Hard)</button>
+                </div>
+                <div class="difficulty-desc" id="diff-desc">
+                    💡 <strong>초급:</strong> 길 알려주기, 음식 주문하기 등 일상생활의 기본 대화와 친숙한 주제로 연습합니다.
+                </div>
+            </div>
+
+            <!-- Step 3: AI Partner Character Selection -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-users"></i> 3. 가상 대화 상대 선택</div>
+                <div class="character-list" id="character-list">
+                    <!-- Dynamic rendering by JS -->
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            
+            <!-- Active Conversation Header -->
+            <div class="chat-header">
+                <div class="active-partner">
+                    <img src="" id="current-partner-avatar" class="active-partner-img" alt="Avatar">
+                    <div class="partner-details">
+                        <h3 id="current-partner-name">Emma Watson</h3>
+                        <p id="current-partner-role">뉴욕의 커피숍 바리스타 • 친근하고 친절한 말투</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="stat-badge" id="current-mode-badge" style="background: rgba(142, 45, 226, 0.2); color: #C084FC;">
+                        🇺🇸 영어 • 초급 모드
+                    </span>
+                </div>
+            </div>
+
+            <!-- Chat Messages Display -->
+            <div class="messages-container" id="messages-container">
+                <!-- Messages appended dynamically -->
+            </div>
+
+            <!-- Audio Input & Control Bar -->
+            <div class="chat-input-container">
+                <div class="status-hint" id="status-hint">
+                    🎤 마이크 버튼을 누르고 말씀하세요 (음성 인식 준비 완료)
+                </div>
+                <div class="controls-wrapper">
+                    <input type="text" id="text-input" class="text-input" placeholder="메시지를 입력하거나 음성으로 말하세요..." onkeypress="handleKeyPress(event)">
+                    
+                    <div class="mic-btn-wrapper">
+                        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" title="마이크 누르고 말하기">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                    </div>
+
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Data Structures for Virtual Foreign Characters
+        const characters = {
+            en: [
+                {
+                    id: 'en_1',
+                    name: 'Emma (에마)',
+                    role: '뉴욕 카페 바리스타',
+                    style: '친근하고 자상한 말투',
+                    tag: '일상 / 주문 / 여행',
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "Hi there! Welcome to Central Perk Cafe! What can I get started for you today?",
+                        medium: "Hey! Good to see you. We have a special blend today. How are you doing this morning?",
+                        hard: "Hello! Welcome. Given the current inflation, our coffee beans have quite a story. What's your take on artisanal roasts?"
+                    }
+                },
+                {
+                    id: 'en_2',
+                    name: 'David (데이비드)',
+                    role: '월스트리트 금융 분석가',
+                    style: '논리적이고 전문적인 말투',
+                    tag: '비즈니스 / 경제',
+                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "Hello! Nice to meet you. Do you want to practice business English today?",
+                        medium: "Good day. I was just reviewing the market trends for this quarter. What brings you here today?",
+                        hard: "Welcome. Global fiscal policy adjustments are creating intriguing market dynamics. Shall we discuss the economic impact?"
+                    }
+                }
+            ],
+            ja: [
+                {
+                    id: 'ja_1',
+                    name: 'Yuki (유키)',
+                    role: '도쿄의 대학생',
+                    style: '귀엽고 활발한 경어 말투',
+                    tag: '취미 / 문화 / 여행',
+                    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "こんにちは！はじめまして。今日（きょう）はどんなお話をしましょうか？",
+                        medium: "こんにちは！最近（さいきん）東京（とうきょう）はとても暖（あたた）かくなりましたね。趣味（しゅみ）は何ですか？",
+                        hard: "はじめまして。現代（げんだい） global 社会（しゃかい）における 문화 교류の 重要性について どうお考えですか？"
+                    }
+                },
+                {
+                    id: 'ja_2',
+                    name: 'Kenji (켄지)',
+                    role: '교토 전통 찻집 주인',
+                    style: '침착하고 격식있는 말투',
+                    tag: '전통 / 음식 / 역사',
+                    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "いらっしゃいませ。お茶（ちゃ）はいかがですか？",
+                        medium: "ようこそお越しくださいました。京都の伝統的なお茶文化についてご紹介いたしましょうか。",
+                        hard: "いらっしゃいませ。伝統の継承と現代化の調和という課題について、意見を交わしてみましょう。"
+                    }
+                }
+            ],
+            fr: [
+                {
+                    id: 'fr_1',
+                    name: 'Chloé (끌로에)',
+                    role: '파리의 디자이너',
+                    style: '감성적이고 감각적인 말투',
+                    tag: '패션 / 예술 / 일상',
+                    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "Bonjour! Enchanté. Comment allez-vous aujourd'hui?",
+                        medium: "Bonjour! Paris est magnifique aujourd'hui. Parlons de votre style préféré!",
+                        hard: "Bonjour. L'impact de la haute couture sur l'économie mondiale est fascinant, n'est-ce pas?"
+                    }
+                }
+            ],
+            zh: [
+                {
+                    id: 'zh_1',
+                    name: 'Wei (웨이)',
+                    role: '상하이 IT 스태프',
+                    style: '친절하고 설명이 상세한 말투',
+                    tag: '테크 / 일상 / 가이드',
+                    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+                    greeting: {
+                        easy: "你好！很高兴认识你。今天你想聊些什么？",
+                        medium: "你好！上海最近天气非常舒服。你平常喜欢做什么？",
+                        hard: "你好。关于人工智能对未来经济发展的深远影响，你想分享一下看法吗？"
+                    }
+                }
+            ]
+        };
+
+        const difficultyDescriptions = {
+            easy: "💡 <strong>초급:</strong> 길 알려주기, 음식 주문하기 등 일상생활의 기본 대화와 친숙한 주제로 연습합니다.",
+            medium: "💡 <strong>중급:</strong> 필수 사용 어휘와 문장 구조를 활용해 다양한 시사/문화 이슈로 대화를 확장합니다.",
+            hard: "💡 <strong>고급:</strong> 고난도 고급 어휘를 활용해 정치, 경제, 철학 등 깊이 있는 토론을 진행합니다."
+        };
+
+        // State Management
+        let currentLang = 'en';
+        let currentDifficulty = 'easy';
+        let currentCharacter = null;
+        let isRecording = false;
+        let recognition = null;
+
+        // Initialize App
+        window.onload = () => {
+            setupSpeechRecognition();
+            selectLanguage('en');
+        };
+
+        function selectLanguage(lang) {
+            currentLang = lang;
+            
+            // Update UI buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+            // Load Characters for selected Language
+            renderCharacters();
+            
+            // Auto Select First Character
+            selectCharacter(characters[lang][0].id);
+        }
+
+        function setDifficulty(diff) {
+            currentDifficulty = diff;
+            
+            // Update UI
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            
+            document.getElementById('diff-desc').innerHTML = difficultyDescriptions[diff];
+            
+            // Refresh conversation header & reset chat
+            updateHeaderBadge();
+            resetChatWithGreeting();
+        }
+
+        function renderCharacters() {
+            const charListEl = document.getElementById('character-list');
+            charListEl.innerHTML = '';
+
+            characters[currentLang].forEach(char => {
+                const card = document.createElement('div');
+                card.className = `character-card ${currentCharacter && currentCharacter.id === char.id ? 'active' : ''}`;
+                card.onclick = () => selectCharacter(char.id);
+                card.id = `char-card-${char.id}`;
+
+                card.innerHTML = `
+                    <div class="avatar-wrapper">
+                        <img src="${char.avatar}" alt="${char.name}">
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="char-info">
+                        <div class="char-name">
+                            <span>${char.name}</span>
+                        </div>
+                        <div class="char-desc">${char.role} • ${char.style}</div>
+                        <span class="char-tag">${char.tag}</span>
+                    </div>
+                `;
+                charListEl.appendChild(card);
+            });
+        }
+
+        function selectCharacter(charId) {
+            const list = characters[currentLang];
+            currentCharacter = list.find(c => c.id === charId) || list[0];
+
+            // Highlight UI
+            document.querySelectorAll('.character-card').forEach(card => card.classList.remove('active'));
+            const selectedCard = document.getElementById(`char-card-${charId}`);
+            if (selectedCard) selectedCard.classList.add('active');
+
+            // Update Header
+            document.getElementById('current-partner-avatar').src = currentCharacter.avatar;
+            document.getElementById('current-partner-name').innerText = currentCharacter.name;
+            document.getElementById('current-partner-role').innerText = `${currentCharacter.role} • ${currentCharacter.style}`;
+
+            updateHeaderBadge();
+            resetChatWithGreeting();
+        }
+
+        function updateHeaderBadge() {
+            const langNames = { en: '영어 🇺🇸', ja: '일본어 🇯🇵', fr: '프랑스어 🇫🇷', zh: '중국어 🇨🇳' };
+            const diffNames = { easy: '초급', medium: '중급', hard: '고급' };
+            document.getElementById('current-mode-badge').innerText = `${langNames[currentLang]} • ${diffNames[currentDifficulty]} 모드`;
+        }
+
+        function resetChatWithGreeting() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+
+            const greetingText = currentCharacter.greeting[currentDifficulty];
+            addMessage('partner', greetingText, getTranslation(greetingText));
+        }
+
+        // Mock translation helper
+        function getTranslation(text) {
+            if (currentLang === 'en') {
+                if (text.includes("Welcome to Central Perk")) return "한국어 번역: 센트럴 파크 카페에 오신 것을 환영합니다! 오늘 어떤 것으로 주문하시겠어요?";
+                if (text.includes("market trends")) return "한국어 번역: 좋은 하루입니다. 이번 분기 시장 동향을 검토 중이었습니다. 오늘 어떤 일로 오셨나요?";
+                return "한국어 번역: 대화를 시작해 보세요!";
+            }
+            return "한국어 번역: 가상 외국인 파트너와 대화를 나눠보세요.";
+        }
+
+        function addMessage(sender, text, translation = '') {
+            const container = document.getElementById('messages-container');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+
+            const avatarSrc = sender === 'partner' ? currentCharacter.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80';
+
+            msgDiv.innerHTML = `
+                <img src="${avatarSrc}" class="message-avatar">
+                <div class="message-content">
+                    <div class="message-text">
+                        ${text}
+                        ${sender === 'partner' ? `<button class="audio-play-btn" onclick="speakText('${text.replace(/'/g, "\\'")}')"><i class="fa-solid fa-volume-high"></i></button>` : ''}
+                    </div>
+                    ${translation ? `<div class="message-translation">${translation}</div>` : ''}
+                    ${sender === 'user' ? `<div class="feedback-badge"><i class="fa-solid fa-check"></i> 발음 정확도 94%</div>` : ''}
+                </div>
+            `;
+
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+
+            if (sender === 'partner') {
+                speakText(text);
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('text-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            input.value = '';
+
+            // Simulate AI Partner Response
+            setTimeout(() => {
+                generateAIResponse(text);
+            }, 1200);
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function generateAIResponse(userText) {
+            let responses = [];
+            if (currentDifficulty === 'easy') {
+                responses = [
+                    "That sounds great! Can you tell me more about that?",
+                    "I see! I recommend trying our delicious iced latte then.",
+                    "Sure thing! Just go straight and turn right at the corner."
+                ];
+            } else if (currentDifficulty === 'medium') {
+                responses = [
+                    "Interesting perspective! How does that compare to your previous experiences?",
+                    "I agree with your point. Regularly practicing vocabulary really enhances fluency."
+                ];
+            } else {
+                responses = [
+                    "Indeed. Socio-economic factors play a crucial role in shaping market volatility.",
+                    "That is a nuanced argument. High-level vocabulary allows for a far more complex discourse."
+                ];
+            }
+
+            const reply = responses[Math.floor(Math.random() * responses.length)];
+            addMessage('partner', reply, "한국어 번역: " + reply);
+        }
+
+        // Web Speech API Integration
+        function setupSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    document.getElementById('mic-btn').classList.add('recording');
+                    document.getElementById('status-hint').innerText = '🎙️ 음성을 듣고 있습니다... 말씀해 주세요!';
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('text-input').value = transcript;
+                    sendMessage();
+                };
+
+                recognition.onerror = () => {
+                    stopRecording();
+                };
+
+                recognition.onend = () => {
+                    stopRecording();
+                };
+            } else {
+                document.getElementById('status-hint').innerText = '⚠️ 브라우저가 음성 인식을 지원하지 않습니다. (텍스트 입력 사용 권장)';
+            }
+        }
+
+        function toggleRecording() {
+            if (!recognition) {
+                alert("현재 브라우저는 음성 인식을 지원하지 않습니다. Chrome 브라우저를 권장합니다.");
+                return;
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                // Set language code based on target lang
+                const langCodes = { en: 'en-US', ja: 'ja-JP', fr: 'fr-FR', zh: 'zh-CN' };
+                recognition.lang = langCodes[currentLang];
+                recognition.start();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('mic-btn').classList.remove('recording');
+            document.getElementById('status-hint').innerText = '🎤 마이크 버튼을 누르고 말씀하세요 (음성 인식 준비 완료)';
+        }
+
+        // Text To Speech (TTS)
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current playing speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                const langCodes = { en: 'en-US', ja: 'ja-JP', fr: 'fr-FR', zh: 'zh-CN' };
+                utterance.lang = langCodes[currentLang];
+                utterance.rate = currentDifficulty === 'easy' ? 0.85 : 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>
